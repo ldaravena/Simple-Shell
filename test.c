@@ -68,7 +68,7 @@ char* getCommandLine() {
 
 void launchProgram(char** cmd) {
 
-    if (strcmp(cmd[0], "exit") == 0) exit(0);
+    if (cmd[0] != NULL && strcmp(cmd[0], "exit") == 0) exit(0);
 
     int pid = fork();
 
@@ -88,14 +88,14 @@ void launchProgram(char** cmd) {
         printf("\033[0;93m");
         fflush(stdout);
     }
-    //return;
+    return;
 }
 
 int main(){
 
 
-    signal(SIGINT, INThandler);
-    //signal(SIGINT, sig_handler);
+    //signal(SIGINT, INThandler);
+
 
     printf("\033[0;93m") ;
 
