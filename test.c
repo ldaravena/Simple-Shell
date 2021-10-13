@@ -12,12 +12,12 @@
 #define SEPARATORS  " \t\r\n\a"
 
 static volatile sig_atomic_t keep_running = 1;
-
+/*
 static void sig_handler(int _)
 {
     (void)_;
     keep_running = 0;
-}
+}*/
 
 void  INThandler(int sig)
 {
@@ -67,7 +67,11 @@ char* getCommandLine() {
 }
 
 void launchProgram(char** cmd) {
+
+    if (strcmp(cmd[0], "exit") == 0) exit(0);
+
     int pid = fork();
+
     if (pid < 0) {
         // Fork falló
         fprintf(stderr, "Fallo al intentar llamar a fork()");
@@ -84,7 +88,7 @@ void launchProgram(char** cmd) {
         printf("\033[0;93m");
         fflush(stdout);
     }
-    return;
+    //return;
 }
 
 int main(){
