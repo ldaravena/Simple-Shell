@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <signal.h>
 
-#define PS1             "ACL-Shell$ "
+#define PS1             "Simple-Shell$ "
 #define LINE_LENGTH     1024
 #define NUM_WORDS   16
 #define SEPARATORS  " \t\r\n\a"
