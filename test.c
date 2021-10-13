@@ -67,7 +67,7 @@ char* getCommandLine() {
 }
 
 void launchProgram(char** cmd) {
-    if(cmd[0] != NULL){
+    if(cmd[0] != NULL){ // Entrada distinta de null
         if (strcmp(cmd[0], "exit") == 0) exit(0);
         if (strcmp(cmd[0], "cmdmonset") == 0){
             //Consultamos si el comando existe (una funcion booleana (con int por el maldito c))
