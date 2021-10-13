@@ -5,6 +5,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <signal.h>
+#include <fcntl.h>
 
 #define PS1             "Simple-Shell$ "
 #define LINE_LENGTH     1024
@@ -27,7 +28,7 @@ void  INThandler(int sig)
      c = getchar();
      if (c == 'y' || c == 'Y'|| c == '\n')
 
-         exitShell();
+        exitShell();
 
      else signal(SIGINT, INThandler);
 }
@@ -73,8 +74,23 @@ int commandExist(char** cmd, int create){// cmd[0] no nos sirve; cmd[1] nombre d
     fclose(archivo);
     return 0;
 }
+void execCommand(char** cmd){
+    int rep = atoi(cmd[3])/atoi(cmd[2]);
+    
+    int segundos = atoi(cmd[2]);
+    cmd[0] = cmd[1];
+    cmd[1] = NULL;
+    cmd[2] = NULL;
+    cmd[3] = NULL;
 
-void launchProgram(char** cmd) {
+    for(int i= 0; i<rep; i++){
+
+        sleep(segundos);        
+        launchProgram(cmd,1);
+    }
+}
+
+void launchProgram(char** cmd, int log) {
     if(cmd[0] != NULL){ // Entrada distinta de null
         if (strcmp(cmd[0], "exit") == 0) exitShell();
         if (strcmp(cmd[0], "cmdmonset") == 0){
@@ -85,6 +101,10 @@ void launchProgram(char** cmd) {
     }
     //Debemos revisar si vamos a ejecutar un comando creado
     int pid = fork();
+    int fw;
+    if(log==1){
+        fw=open("pato.txt",O_APPEND|O_WRONLY);
+    }
 
     if (pid < 0) {
         // Fork falló
@@ -93,6 +113,9 @@ void launchProgram(char** cmd) {
         // Proceso hijo
         printf("\033[0;96m");
         fflush(stdout);
+        if (log==1){
+            dup2(fw,1);
+        }
         execvp(cmd[0], cmd);
         fprintf(stderr, "%s: Comando no encontrado\n", cmd[0]);
         exit(0);
@@ -102,24 +125,10 @@ void launchProgram(char** cmd) {
         printf("\033[0;93m");
         fflush(stdout);
     }
+
+    if(log==1) close(fw);
     //return;
 }
-
-void execCommand(char** cmd){
-    int rep = atoi(cmd[3])/atoi(cmd[2]);
-    int segundos = atoi(cmd[2]);
-    cmd[0] = cmd[1];
-    cmd[1] = NULL;
-    cmd[2] = NULL;
-    cmd[3] = NULL;
-    for(int i= 0; i<rep; i++){
-        sleep(segundos);
-        launchProgram(cmd);
-    }
-}
-
-
-
 
 void createCommand(char** cmd){
     FILE* archivo;
@@ -143,7 +152,7 @@ int main(){
         char* line = getCommandLine();
 
         char** cmd = splitLine(line);
-        if(!commandExist(cmd,0)) launchProgram(cmd);
+        if(!commandExist(cmd,0)) launchProgram(cmd,0);
     }
 
     return 0;
