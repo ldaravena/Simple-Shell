@@ -11,13 +11,12 @@
 #define NUM_WORDS   16
 #define SEPARATORS  " \t\r\n\a"
 
-static volatile sig_atomic_t keep_running = 1;
-/*
-static void sig_handler(int _)
-{
-    (void)_;
-    keep_running = 0;
-}*/
+void exitShell(){
+
+    //TODO: Liberar memoria dinámica
+
+    exit(0);
+}
 
 void  INThandler(int sig)
 {
@@ -26,12 +25,11 @@ void  INThandler(int sig)
      signal(sig, SIG_IGN);
      printf("\nDesea Salir de la Shell? [Y/n] ");
      c = getchar();
-     if (c == 'y' || c == 'Y'|| c == '\n')  //keep_running = 0;
+     if (c == 'y' || c == 'Y'|| c == '\n')
 
-         exit(0);
+         exitShell();
 
      else signal(SIGINT, INThandler);
-     //getchar(); // Get new line character
 }
 
 char** splitLine(char* line) {
@@ -47,19 +45,12 @@ char** splitLine(char* line) {
         }
     }
 
-    /*
-     * for (int i = 0; cmd[i] != NULL; i++) {
-     *     // Quita las comillas de cada argumento
-     *     int len = strlen(cmd[i]);
-     * }
-     */
-
     return cmd;
 }
 
 char* getCommandLine() {
     char* line = (char*) malloc(LINE_LENGTH * sizeof(char));
-    //printf("%d", getpid());
+
     printf(PS1);
     scanf("%[^\n]", line);
     getc(stdin);
@@ -68,11 +59,11 @@ char* getCommandLine() {
 
 void launchProgram(char** cmd) {
     if(cmd[0] != NULL){ // Entrada distinta de null
-        if (strcmp(cmd[0], "exit") == 0) exit(0);
+        if (strcmp(cmd[0], "exit") == 0) exitShell();
         if (strcmp(cmd[0], "cmdmonset") == 0){
             //Consultamos si el comando existe (una funcion booleana (con int por el maldito c))
             //Si es que no existe lo creamos 
-            exit(0);
+            exitShell();
         }
     }
     //Debemos revisar si vamos a ejecutar un comando creado
@@ -100,13 +91,9 @@ void launchProgram(char** cmd) {
 
 int main(){
 
-
     signal(SIGINT, INThandler);
-    //signal(SIGINT, sig_handler);
 
-    printf("\033[0;93m") ;
-
-//   printf("Shell $:\n");
+    printf("\033[0;93m");
 
     while(1){
 
@@ -115,9 +102,6 @@ int main(){
         char** cmd = splitLine(line);
         launchProgram(cmd);
     }
-
-
-   // while(1);
 
     return 0;
 }
