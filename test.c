@@ -69,6 +69,12 @@ char* getCommandLine() {
 void launchProgram(char** cmd) {
 
     if (strcmp(cmd[0], "exit") == 0) exit(0);
+    if (strcmp(cmd[0], "cmdmonset") == 0){
+        //Consultamos si el comando existe (una funcion booleana (con int por el maldito c))
+        //Si es que no existe lo creamos 
+        exit(0);
+    }
+    //Debemos revisar si vamos a ejecutar un comando creado
 
     int pid = fork();
 
