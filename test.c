@@ -21,16 +21,19 @@ static void sig_handler(int _)
 
 void  INThandler(int sig)
 {
-     char  c;
+    char  c;
 
-     signal(sig, SIG_IGN);
-     printf("\nDesea Salir de la Shell? [Y/n] ");
-     c = getchar();
-     if (c == 'y' || c == 'Y'|| c == '\n')  //keep_running = 0;
+    signal(sig, SIG_IGN);
+    printf("\nDesea Salir de la Shell? [Y/n]: ");
+    c = getchar();
+    if (c == 'y' || c == 'Y'|| c == '\n'){  //keep_running = 0;
 
-         exit(0);
+        exit(0);
+    }
 
-     else signal(SIGINT, INThandler);
+    signal(SIGINT, INThandler);
+
+
      //getchar(); // Get new line character
 }
 
@@ -94,7 +97,7 @@ void launchProgram(char** cmd) {
 int main(){
 
 
-    //signal(SIGINT, INThandler);
+    signal(SIGINT, INThandler);
 
 
     printf("\033[0;93m") ;
