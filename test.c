@@ -11,6 +11,29 @@
 #define NUM_WORDS   16
 #define SEPARATORS  " \t\r\n\a"
 
+static volatile sig_atomic_t keep_running = 1;
+
+static void sig_handler(int _)
+{
+    (void)_;
+    keep_running = 0;
+}
+
+void  INThandler(int sig)
+{
+     char  c;
+
+     signal(sig, SIG_IGN);
+     printf("\nDesea Salir de la Shell? [Y/n] ");
+     c = getchar();
+     if (c == 'y' || c == 'Y'|| c == '\n')  //keep_running = 0;
+
+         exit(0);
+
+     else signal(SIGINT, INThandler);
+     //getchar(); // Get new line character
+}
+
 char** splitLine(char* line) {
     char** cmd = (char**) malloc(NUM_WORDS * sizeof(char*));
     size_t max = NUM_WORDS;
@@ -66,11 +89,16 @@ void launchProgram(char** cmd) {
 
 int main(){
 
+
+    signal(SIGINT, INThandler);
+    //signal(SIGINT, sig_handler);
+
     printf("\033[0;93m") ;
 
 //   printf("Shell $:\n");
 
     while(1){
+
         char* line = getCommandLine();
 
         char** cmd = splitLine(line);
