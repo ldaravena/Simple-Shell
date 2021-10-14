@@ -126,7 +126,7 @@ void createCommand(char** cmd){
     FILE* archivo;
     archivo = fopen ("comandos", "a+");
     if (archivo==NULL) {fputs ("File error",stderr); exit (1);}
-    if(!strcmp(cmd[2],"vmstat") || !strcmp(cmd[2],"netstat")){
+    if((!strcmp(cmd[2],"vmstat") || !strcmp(cmd[2],"netstat")) && atoi(cmd[3]) <= atoi(cmd[4])){
         fprintf(archivo,"%s %s %s %s\n", cmd[1],cmd[2],cmd[3],cmd[4]);
         printf("COMANDO CREADO\n");
     }
