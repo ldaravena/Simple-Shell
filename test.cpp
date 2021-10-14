@@ -24,6 +24,10 @@ void exitShell(){
 
     exit(0);
 }
+struct command
+{
+  char **argv;
+};
 
 void  INThandler(int sig){
 
@@ -152,9 +156,40 @@ void createCommand(char** cmd){
     }
     fclose(archivo);
 }
+int isPipe(char* linea){
+    int max = 8;
+    int posiciones = 0;
+    int contador = 1;
+    for(int i=0;linea[i]!='\0';i++){
+        if(linea[i]=='|'){
+            posiciones++;
+        }
+    }
+    return posiciones;
+}
 
+command* argsPipe(char * line, int n){
+    command * args = (command*) malloc((n+1) * sizeof(command));
+    char ** args2 = (char**) malloc(NUM_WORDS * sizeof(char*));
+    char * token;
+    char * auxLine = line;
+    for(int i=0;i<n+1;i++){
+       token = strtok(auxLine, "|");
+       if(token!=NULL){
+            args2[i] = token;
+            cout<<args2[i]<<endl; 
+       }
+       auxLine = NULL;    
+    }
+    for(int i=0;i<n+1;i++){
+        char** generado = splitLine(args2[i]);
+        command aux;
+        aux.argv = generado;
+        args[i] = aux;
+    }
 
-
+    return args;
+}
 
 int main(){
 
@@ -165,22 +200,35 @@ int main(){
     while(1){
 
         char* line = getCommandLine();
+        int n = isPipe(line);
+        cout<<n<<endl;
         int flag = 0;
-        char** cmd = splitLine(line);
-        if(cmd[0]!=0){
-  
-            if (strcmp(cmd[0], "exit") == 0) exitShell();
-            if (strcmp(cmd[0], "cmdmonset") == 0)
-                if(!commandExist(cmd,1)){ 
-                    createCommand(cmd);
-                    flag = 1;
-                }
-                else{
-                    printf("COMANDO EXISTENTE\n");
-                    flag = 1;
-                }
+        if(!n){
+            char** cmd = splitLine(line);
+            if(cmd[0]!=0){
+    
+                if (strcmp(cmd[0], "exit") == 0) exitShell();
+                if (strcmp(cmd[0], "cmdmonset") == 0)
+                    if(!commandExist(cmd,1)){ 
+                        createCommand(cmd);
+                        flag = 1;
+                    }
+                    else{
+                        printf("COMANDO EXISTENTE\n");
+                        flag = 1;
+                    }
+            }
+            if(!commandExist(cmd,0) && !flag) launchProgram(cmd,0);
         }
-        if(!commandExist(cmd,0) && !flag) launchProgram(cmd,0);
+        else{
+            command * args = argsPipe(line,n);
+            for(int i=0;i<n+1;i++){
+                for(int j=0;args[i].argv[j]!=NULL;j++){
+                    cout<<args[i].argv[j]<<" ";
+                }
+                cout<<endl;
+            }
+        }
     }
 
     return 0;
