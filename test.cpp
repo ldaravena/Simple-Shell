@@ -34,9 +34,9 @@ void  INThandler(int sig){
      char  c;
      signal(sig, SIG_IGN);
      printf("\nDesea Salir de la Shell? [Y/n] ");
+     scanf("%c",&c);
      cin.clear();
-     cin>>c;
-     cin.clear();
+
      if (c == 'y' || c == 'Y'|| c == '\n'){
          exitShell();
      }      
@@ -156,6 +156,86 @@ void createCommand(char** cmd){
     }
     fclose(archivo);
 }
+void doPipe(struct command *args,int npipe){
+    int twopipe; // o 0
+    if(npipe==1){
+        twopipe=0;
+    }
+    if(npipe==2){
+        twopipe=1;
+    }
+    if(npipe>2){
+        cout << "No soportado, máximo 2 pipes"<<endl;
+        return;
+    }
+    int pipes[4];
+    pipe(pipes);
+    if(twopipe>=1)pipe(pipes + 2); 
+  
+    if (fork() == 0){
+        
+        dup2(pipes[1], 1);// 1PIPE
+        
+        close(pipes[0]);  // 1PIPE
+        close(pipes[1]);  // 1PIPE
+
+        if(twopipe){
+            close(pipes[2]);  // 2PIPE
+            close(pipes[3]);  // 2PIPE
+        }
+
+        execvp(args[0].argv[0],(char* const*)args[0].argv);
+        
+        
+        //execvp(*cat_args, cat_args);  // PRIMERO (*, )
+    }
+    else{
+        if (fork() == 0){
+      
+            dup2(pipes[0], 0);  // 1PIPE
+
+            if(twopipe){
+                dup2(pipes[3], 1);// 2PIPE
+                close(pipes[2]);  // 2PIPE
+                close(pipes[3]);  // 2PIPE
+            }
+
+            close(pipes[0]);  // 1PIPE
+            close(pipes[1]);  // 1PIPE
+
+            execvp(args[1].argv[0],(char* const*)args[1].argv);
+	    }
+        else{
+         
+            if (fork() == 0 && twopipe==1){ // 2PIPE
+                dup2(pipes[2], 0);
+
+                close(pipes[2]);  // 2PIPE
+                close(pipes[3]);  // 2PIPE
+                close(pipes[0]);  // 1PIPE
+                close(pipes[1]);  // 1PIPE
+
+                execvp(args[2].argv[0],(char* const*)args[2].argv);
+                //execvp(*wc_args, wc_args);   // TERCERO
+            }
+            if(twopipe==0){
+                close(pipes[0]);  // 1PIPE
+                close(pipes[1]);  // 1PIPE
+            }
+            
+	    }
+    }
+  
+    close(pipes[0]);
+    close(pipes[1]);
+    close(pipes[2]);
+    close(pipes[3]);
+
+    for (int i= 0; i < npipe+1; i++) {
+        wait(NULL);
+    }
+  }
+
 int isPipe(char* linea){
     int max = 8;
     int posiciones = 0;
@@ -177,7 +257,7 @@ command* argsPipe(char * line, int n){
        token = strtok(auxLine, "|");
        if(token!=NULL){
             args2[i] = token;
-            cout<<args2[i]<<endl; 
+            //cout<<args2[i]<<endl; 
        }
        auxLine = NULL;    
     }
@@ -198,10 +278,10 @@ int main(){
     printf("\033[0;93m");
 
     while(1){
-
+        
         char* line = getCommandLine();
         int n = isPipe(line);
-        cout<<n<<endl;
+        //cout<<n<<endl;
         int flag = 0;
         if(!n){
             char** cmd = splitLine(line);
@@ -222,12 +302,14 @@ int main(){
         }
         else{
             command * args = argsPipe(line,n);
-            for(int i=0;i<n+1;i++){
+            doPipe(args,n);
+
+            /*for(int i=0;i<n+1;i++){
                 for(int j=0;args[i].argv[j]!=NULL;j++){
                     cout<<args[i].argv[j]<<" ";
                 }
                 cout<<endl;
-            }
+            }*/
         }
     }
 
