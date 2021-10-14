@@ -7,6 +7,11 @@
 #include <unistd.h>
 #include <signal.h>
 #include <fcntl.h>
+#include <ctype.h>
+#include <setjmp.h>
+#include <sys/time.h>
+
+
 
 using namespace std;
 
@@ -157,45 +162,43 @@ void createCommand(char** cmd){
     fclose(archivo);
 }
 void doPipe(struct command *args,int npipe){
-    int twopipe; // o 0
-    if(npipe==1){
-        twopipe=0;
-    }
-    if(npipe==2){
-        twopipe=1;
-    }
+
     if(npipe>2){
         cout << "No soportado, máximo 2 pipes"<<endl;
         return;
     }
     int pipes[4];
     pipe(pipes);
-    if(twopipe>=1)pipe(pipes + 2); 
-  
-    if (fork() == 0){
-        
+    if(npipe>1)pipe(pipes + 2); 
+
+    pid_t pid = fork();
+    pid_t pid2;
+    pid_t pid3;
+
+    if (pid == 0){
         dup2(pipes[1], 1);// 1PIPE
         
         close(pipes[0]);  // 1PIPE
         close(pipes[1]);  // 1PIPE
 
-        if(twopipe){
+        if(npipe>1){
             close(pipes[2]);  // 2PIPE
             close(pipes[3]);  // 2PIPE
         }
 
         execvp(args[0].argv[0],(char* const*)args[0].argv);
         
-        
-        //execvp(*cat_args, cat_args);  // PRIMERO (*, )
     }
     else{
-        if (fork() == 0){
-      
+        pid2 = fork();
+        if (pid2 == 0){
             dup2(pipes[0], 0);  // 1PIPE
+            
 
-            if(twopipe){
+            if(npipe>1){
+
                 dup2(pipes[3], 1);// 2PIPE
+                
                 close(pipes[2]);  // 2PIPE
                 close(pipes[3]);  // 2PIPE
             }
@@ -206,34 +209,42 @@ void doPipe(struct command *args,int npipe){
             execvp(args[1].argv[0],(char* const*)args[1].argv);
 	    }
         else{
-         
-            if (fork() == 0 && twopipe==1){ // 2PIPE
-                dup2(pipes[2], 0);
+            if(npipe>1){  // 2PIPE
+                pid3 = fork();
+                if (pid3 == 0){ // 2PIPE
+                    dup2(pipes[2], 0);
+                
+                    close(pipes[2]);  // 2PIPE
+                    close(pipes[3]);  // 2PIPE
+                    close(pipes[0]);  // 1PIPE
+                    close(pipes[1]);  // 1PIPE
 
-                close(pipes[2]);  // 2PIPE
-                close(pipes[3]);  // 2PIPE
-                close(pipes[0]);  // 1PIPE
-                close(pipes[1]);  // 1PIPE
-
-                execvp(args[2].argv[0],(char* const*)args[2].argv);
-                //execvp(*wc_args, wc_args);   // TERCERO
+                    execvp(args[2].argv[0],(char* const*)args[2].argv);
+                }    
             }
-            if(twopipe==0){
-                close(pipes[0]);  // 1PIPE
-                close(pipes[1]);  // 1PIPE
+            if(npipe==1){         // 1PIPE
+                close(pipes[0]);  
+                close(pipes[1]);  
             }
             
 	    }
     }
+
   
     close(pipes[0]);
     close(pipes[1]);
     close(pipes[2]);
     close(pipes[3]);
-
+    
     for (int i= 0; i < npipe+1; i++) {
         wait(NULL);
+        
     }
+    
+    kill(pid,SIGKILL);
+    kill(pid2,SIGKILL);
+    if(npipe>1)kill(pid3,SIGKILL);
+    
   }
 
 int isPipe(char* linea){
@@ -302,7 +313,9 @@ int main(){
         }
         else{
             command * args = argsPipe(line,n);
+            
             doPipe(args,n);
+            
 
             /*for(int i=0;i<n+1;i++){
                 for(int j=0;args[i].argv[j]!=NULL;j++){
