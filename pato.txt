@@ -88,3 +88,18 @@ procs -----------memoria---------- ---swap-- -----io---- -sistema-- ------cpu---
 procs -----------memoria---------- ---swap-- -----io---- -sistema-- ------cpu-----
  r  b   swpd  libre búfer caché   si   so    bi    bo   in   cs us sy id wa st
  7  0   4608 890688 164712 2261368    0    0    19    13   88  245 14  4 82  0  0
+procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
+ r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st
+ 0  0      0 7118116  66280 551448    0    0     2    27   30   55  0  0 100  0  0
+procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
+ r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st
+ 0  0      0 7118116  66296 551452    0    0     2    27   30   55  0  0 100  0  0
+procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
+ r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st
+ 0  0      0 7117004  66312 551452    0    0     2    27   30   55  0  0 100  0  0
+procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
+ r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st
+ 0  0      0 7117508  66328 551452    0    0     2    26   30   55  0  0 100  0  0
+procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
+ r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st
+ 0  0      0 7116004  66344 551452    0    0     2    26   30   55  0  0 100  0  0

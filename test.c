@@ -68,6 +68,7 @@ int commandExist(char** cmd, int create){// cmd[0] no nos sirve; cmd[1] nombre d
         if(cmd[1] != NULL && !strcmp(line[0],cmd[1]) && create) return 1;
         if(cmd[0] != NULL && !strcmp(line[0],cmd[0]) && !create){
             execCommand(line);
+            fclose(archivo);
             return 1;
         }
     }
@@ -91,15 +92,6 @@ void execCommand(char** cmd){
 }
 
 void launchProgram(char** cmd, int log) {
-    if(cmd[0] != NULL){ // Entrada distinta de null
-        if (strcmp(cmd[0], "exit") == 0) exitShell();
-        if (strcmp(cmd[0], "cmdmonset") == 0){
-            if(!commandExist(cmd,1)) createCommand(cmd);//Consultamos si el comando existe (una funcion booleana (con int por el maldito c)), y si existe se reemplaza
-            //Si es que no existe lo creamos 
-            exitShell();
-        }
-    }
-    //Debemos revisar si vamos a ejecutar un comando creado
     int pid = fork();
     int fw;
     if(log==1){
@@ -134,8 +126,13 @@ void createCommand(char** cmd){
     FILE* archivo;
     archivo = fopen ("comandos", "a+");
     if (archivo==NULL) {fputs ("File error",stderr); exit (1);}
-    printf("%s\n", cmd[2]);
-    fprintf(archivo,"%s %s %s %s\n", cmd[1],cmd[2],cmd[3],cmd[4]);
+    if(!strcmp(cmd[2],"vmstat") || !strcmp(cmd[2],"netstat")){
+        fprintf(archivo,"%s %s %s %s\n", cmd[1],cmd[2],cmd[3],cmd[4]);
+        printf("COMANDO CREADO\n");
+    }
+    else{
+        printf("ERROR, COMANDO NO CREADO\n");
+    }
     fclose(archivo);
 }
 
@@ -150,9 +147,21 @@ int main(){
     while(1){
 
         char* line = getCommandLine();
-
+        int flag = 0;
         char** cmd = splitLine(line);
-        if(!commandExist(cmd,0)) launchProgram(cmd,0);
+        if(cmd[0]!=0){
+            if (strcmp(cmd[0], "exit") == 0) exitShell();
+            if (strcmp(cmd[0], "cmdmonset") == 0)
+                if(!commandExist(cmd,1)){ 
+                    createCommand(cmd);
+                    flag = 1;
+                }
+                else{
+                    printf("COMANDO EXISTENTE\n");
+                    flag = 1;
+                }
+        }
+        if(!commandExist(cmd,0) && !flag) launchProgram(cmd,0);
     }
 
     return 0;
