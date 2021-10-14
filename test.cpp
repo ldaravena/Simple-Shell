@@ -42,7 +42,7 @@ void  INThandler(int sig){
      cin.getline(c,2*sizeof(char));
      cin.clear();
   
-    if (c[0] == 'y' ){
+    if (c[0] == 'y' || c[0] == 'Y'|| c[0] == '\n'){
         exitShell();
      }
     free(c);
