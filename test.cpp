@@ -123,7 +123,7 @@ void launchProgram(char** cmd, int log) {
     pid_t pid = fork();
     int fw;
     if(log==1){
-        fw=open("pato.txt",O_APPEND|O_WRONLY);
+        fw=open("resultado.txt",O_APPEND|O_WRONLY);
     }
 
     if (pid < 0) {
